@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from blue_interface import BlueInterface, _BlueControlMode
+from blue_interface import BlueInterface
 import numpy as np
 import time
 import transformations as t
@@ -18,6 +18,7 @@ if __name__ == '__main__':
         home,
         duration=5.0
     )
+    position_control_mode = blue._control_mode # super sketchy
 
 
     # Set up a publisher for our cartesian pose command (a little sketchy)
@@ -38,9 +39,11 @@ if __name__ == '__main__':
     # Gripper state
     gripper_closed = False
 
+    print("Ready!")
+
     while True:
         if mouse.input_button0:
-            blue._set_control_mode(_BlueControlMode.POSITION)
+            blue._set_control_mode(position_control_mode) # position control mode
 
             ## Read current state
             current_pose = blue.get_cartesian_pose()
