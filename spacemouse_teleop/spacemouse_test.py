@@ -3,8 +3,9 @@ import spacemouse
 
 mouse = spacemouse.SpaceMouse()
 while True:
-    print(mouse.input_pos)
-    time.sleep(0.1)
+    # print(mouse.input_pos)
+    print(mouse.input_button0, "\t", mouse.input_button1)
+    time.sleep(1)
 mouse.shutdown()
 
 # from __future__ import print_function

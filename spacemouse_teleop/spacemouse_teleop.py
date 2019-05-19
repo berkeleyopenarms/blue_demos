@@ -80,14 +80,14 @@ if __name__ == '__main__':
         pose_target_publisher.publish(pose_target_msg)
 
         ## Gripper stuff
-        if gripper_closed != mouse.input_button:
+        if gripper_closed != mouse.input_button1:
             if gripper_closed:
                 # open gripper
                 blue.command_gripper(0.0, 10.0)
             else:
                 # close gripper
                 blue.command_gripper(-1.5, 20.0)
-            gripper_closed = mouse.input_button
+            gripper_closed = mouse.input_button1
 
         ## Sleep
         time.sleep(0.01)

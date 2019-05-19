@@ -35,7 +35,8 @@ class SpaceMouse:
 
         self.input_pos = [0, 0, 0]
         self.input_rot = [0, 0, 0]
-        self.input_button = False
+        self.input_button0 = False
+        self.input_button1 = False
 
         self._alive = True
 
@@ -78,7 +79,8 @@ class SpaceMouse:
 
                 if data[0] == 3:
                     # button packet
-                    self.input_button = (data[1] != 0)
+                    self.input_button0 = ((data[1] & 0b1) == 0b1)
+                    self.input_button1 = ((data[1] >> 1 & 0b1) == 0b1)
 
             except usb.core.USBError:
                 pass # timeout, probably
