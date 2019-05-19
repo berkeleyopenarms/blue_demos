@@ -12,7 +12,11 @@ if __name__ == '__main__':
 
     # Python interface
     blue = BlueInterface(arm_side, address)
-    blue.set_joint_positions(blue.get_joint_positions())
+    blue.set_joint_positions( # TODO: this sometimes fights with the IK solver, and makes the robot really jittery
+        [-0.43383663, -1.16384333, 0.75438465, -1.58150699, -0.05635529, -1.67967716, -0.13010218],
+        duration=2.0
+    )
+
 
     # Set up a publisher for our cartesian pose command (a little sketchy)
     RBC = blue._RBC
@@ -29,22 +33,33 @@ if __name__ == '__main__':
     target_position = target_pose["position"]
     target_orientation = target_pose["orientation"]
 
+    # Gripper state
+    gripper_closed = False
+
     while True:
-        ## Mouse coordinate frame stuff
-        input_pos = np.asarray([
-            mouse.input_pos[1],
-            mouse.input_pos[0],
-            -mouse.input_pos[2]
-        ]) / 1000.0
+        ## Read current state
+        current_pose = blue.get_cartesian_pose()
+        current_position = current_pose["position"]
+        current_orientation = current_pose["orientation"]
 
-        input_rot = t.quaternion_from_euler(*[
-            mouse.input_rot[1] / 200.0,
-            mouse.input_rot[0] / 200.0,
-            -mouse.input_rot[2] / 150.0
-        ])
-        input_rot /= input_rot[3]
+        ## Compute new target pose
+        if np.linalg.norm(mouse.input_pos) > 10:
+            input_pos = np.asarray([
+                mouse.input_pos[1],
+                mouse.input_pos[0],
+                -mouse.input_pos[2]
+            ]) / 1000.0
+            target_position = current_position + input_pos
 
-        ## Publishing stuff
+        if np.linalg.norm(mouse.input_rot) > 10:
+            input_rot = t.quaternion_from_euler(*[
+                mouse.input_rot[1] / 200.0,
+                mouse.input_rot[0] / 200.0,
+                -mouse.input_rot[2] / 150.0
+            ])
+            target_orientation = t.quaternion_multiply(input_rot, current_orientation)
+
+        ## Publishing target pose
         pose_target_msg = {
             "header": {
                 "frame_id": "base_link"
@@ -52,15 +67,25 @@ if __name__ == '__main__':
             "pose": {
                 "position": dict(zip(
                     ("x", "y", "z"),
-                    target_position + input_pos
+                    target_position
                 )),
                 "orientation": dict(zip(
                     ("x", "y", "z", "w"),
-                    t.quaternion_multiply(input_rot, target_orientation)
+                    target_orientation
                 ))
             }
         }
         pose_target_publisher.publish(pose_target_msg)
+
+        ## Gripper stuff
+        if gripper_closed != mouse.input_button:
+            if gripper_closed:
+                # open gripper
+                blue.command_gripper(0.0, 10.0)
+            else:
+                # close gripper
+                blue.command_gripper(-1.5, 20.0)
+            gripper_closed = mouse.input_button
 
         ## Sleep
         time.sleep(0.01)
