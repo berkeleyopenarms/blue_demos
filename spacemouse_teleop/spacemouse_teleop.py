@@ -16,7 +16,7 @@ if __name__ == '__main__':
     home = [0.0, -1.571, 0.0, -1.571, 0.0, -1.571, 0.0]
     blue.set_joint_positions( # TODO: this sometimes fights with the IK solver, and makes the robot really jittery
         home,
-        duration=5.0
+        duration=1.0
     )
     position_control_mode = blue._control_mode # super sketchy
 
@@ -39,10 +39,21 @@ if __name__ == '__main__':
     # Gripper state
     gripper_closed = False
 
+    #
+    prev_input_button0 = False
+
+    disabled = False
+
     print("Ready!")
 
     while True:
-        if mouse.input_button0:
+        if not mouse.input_button0 and prev_input_button0:
+            print(disabled)
+            disabled = not disabled
+
+        if disabled:
+            blue.disable_control()
+        else:
             blue._set_control_mode(position_control_mode) # position control mode
 
             ## Read current state
@@ -94,8 +105,8 @@ if __name__ == '__main__':
                     # close gripper
                     blue.command_gripper(-1.5, 20.0)
                 gripper_closed = mouse.input_button1
-        else:
-            blue.disable_control()
+
+        prev_input_button0 = mouse.input_button0
 
         ## Sleep
         time.sleep(0.01)
