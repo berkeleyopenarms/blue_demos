@@ -12,9 +12,11 @@ if __name__ == '__main__':
 
     # Python interface
     blue = BlueInterface(arm_side, address)
+    home = [-0.433836, -1.16384, 0.75438465, -1.58150699, -0.05635529, -1.67967716, -0.13010218]
+    home = [0.0, -1.571, 0.0, -1.571, 0.0, -1.571, 0.0]
     blue.set_joint_positions( # TODO: this sometimes fights with the IK solver, and makes the robot really jittery
-        [-0.43383663, -1.16384333, 0.75438465, -1.58150699, -0.05635529, -1.67967716, -0.13010218],
-        duration=2.0
+        home,
+        duration=5.0
     )
 
 
