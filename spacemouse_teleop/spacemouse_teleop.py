@@ -100,10 +100,10 @@ if __name__ == '__main__':
             if gripper_closed != mouse.input_button1:
                 if gripper_closed:
                     # open gripper
-                    blue.command_gripper(0.0, 10.0)
+                    blue.command_gripper(1.0, 10.0)
                 else:
                     # close gripper
-                    blue.command_gripper(-1.5, 20.0)
+                    blue.command_gripper(-1.80, 30.0)
                 gripper_closed = mouse.input_button1
 
         prev_input_button0 = mouse.input_button0
