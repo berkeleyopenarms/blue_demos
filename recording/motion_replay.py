@@ -47,7 +47,7 @@ if __name__ == '__main__':
             if gripper_list[i] < -0.2:
                 blue.command_gripper(-1.3, 15.0)
             else:
-                blue.command_gripper(0, 2.0)
+                blue.command_gripper(1, 10.0)
             sleep_time = 1.0/frequency - (time.time() - last_time)
             if sleep_time > 0:
                 time.sleep(sleep_time)
@@ -57,6 +57,3 @@ if __name__ == '__main__':
         print (sys.exc_info()[0])
         print ("Something went wrong... exiting")
         pass
-
-    time.sleep(2)
-    blue.shutdown()

@@ -59,6 +59,3 @@ if __name__ == '__main__':
     else:
         pickle.dump((joint_angle_list, pose_list, gripper_list, frequency), open(filename, "wb")) #uses the pickle function to write a binary file
         print('Your position list has been saved in the directory')
-
-    time.sleep(2)
-    blue.shutdown()
