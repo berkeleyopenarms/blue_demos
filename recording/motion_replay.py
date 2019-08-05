@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser.add_argument('record_file', type=str, help='Loads a recorded motion from this file')
     parser.add_argument('--address', default=consts.default_address, type=str, help='Address of the host computer')
     parser.add_argument('--port', default=consts.default_port, type=int, help='Port that the ros web host was started on')
-    parser.add_argument('--frequency', default=0, type=int, help='Replay the recording at a custom frequency (Hz)')
+    parser.add_argument('--frequency', default=0, type=float, help='Replay the recording at a custom frequency (Hz)')
     args = parser.parse_args()
 
     filename = args.record_file
@@ -35,25 +35,28 @@ if __name__ == '__main__':
     # If no argument is passed for replay frequency, play the recording at the rate it was recorded.
     if args.frequency == 0:
         frequency = record_frequency # In Hertz
+    else:
+        frequency = args.frequency
 
     input("Press enter to start replay. To exit, press <ctrl+c>.")
 
-    try:
-        last_time = 0.0
-        for i in range (len(joint_angle_list)):
-            #if len(joint_angle_list[i]) == 7:
-            blue.set_joint_positions(np.array(joint_angle_list[i])) # tell the robot to go to a set of joint angles
-            #blue.command_gripper(gripper_list[i], 30.0)
-            if gripper_list[i] < -0.2:
-                blue.command_gripper(-1.3, 15.0)
-            else:
-                blue.command_gripper(1, 10.0)
-            sleep_time = 1.0/frequency - (time.time() - last_time)
-            if sleep_time > 0:
-                time.sleep(sleep_time)
-            last_time = time.time()
+    while True:
+        try:
+            last_time = 0.0
+            for i in range (len(joint_angle_list)):
+                #if len(joint_angle_list[i]) == 7:
+                blue.set_joint_positions(np.array(joint_angle_list[i])) # tell the robot to go to a set of joint angles
+                #blue.command_gripper(gripper_list[i], 30.0)
+                if gripper_list[i] > 0:
+                    blue.command_gripper(2, 15.0)
+                else:
+                    blue.command_gripper(-0.8, 10.0)
+                sleep_time = 1.0/frequency - (time.time() - last_time)
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
+                last_time = time.time()
 
-    except:
-        print (sys.exc_info()[0])
-        print ("Something went wrong... exiting")
-        pass
+        except:
+            print (sys.exc_info()[0])
+            print ("Something went wrong... exiting")
+            break
