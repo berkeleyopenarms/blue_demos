@@ -53,6 +53,9 @@ if __name__ == '__main__':
 
         if disabled:
             blue.disable_control()
+            current_pose = blue.get_cartesian_pose()
+            target_position = current_pose["position"]
+            target_orientation = current_pose["orientation"]
         else:
             blue._set_control_mode(position_control_mode) # position control mode
 
@@ -63,12 +66,12 @@ if __name__ == '__main__':
 
             ## Compute new target pose
             if np.linalg.norm(mouse.input_pos) > 10:
-                input_pos = np.asarray([
+                input_position = np.asarray([
                     mouse.input_pos[1],
                     mouse.input_pos[0],
                     -mouse.input_pos[2]
                 ]) / 1000.0
-                target_position = current_position + input_pos
+                target_position = current_position + input_position
 
             if np.linalg.norm(mouse.input_rot) > 10:
                 input_rot = t.quaternion_from_euler(*[
@@ -100,10 +103,10 @@ if __name__ == '__main__':
             if gripper_closed != mouse.input_button1:
                 if gripper_closed:
                     # open gripper
-                    blue.command_gripper(1.0, 10.0)
+                    blue.command_gripper(-1.0, 10.0)
                 else:
                     # close gripper
-                    blue.command_gripper(-1.80, 30.0)
+                    blue.command_gripper(2.00, 30.0)
                 gripper_closed = mouse.input_button1
 
         prev_input_button0 = mouse.input_button0
