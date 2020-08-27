@@ -6,7 +6,7 @@ Setup instructions are below
 * `./install_udev_rules.sh`
 * Then log out and log back in.
 
-## Windows
+## Windows (untested)
 * Install libusb for windows
     * Follow the instructions here https://github.com/pyusb/pyusb/issues/120#issuecomment-322058585
 

@@ -8,18 +8,25 @@ import threading
 
 class SpaceMouse:
     def __init__(self):
-        usb_ids = [
+        space_mouse_ids = [
         #   (idVendor, idProduct)
             (0x46d, 0xc626),
             (0x256f, 0xc635),
+        ]
+        space_mouse_pro_ids = [
             (0x46d, 0xc62b),
         ]
 
         _device = None
+        self._is_pro = False
         while _device is None:
-            if usb_ids:
-                vendor_id, product_id = usb_ids.pop()
+            if space_mouse_ids:
+                vendor_id, product_id = space_mouse_ids.pop()
                 _device = usb.core.find(idVendor=vendor_id, idProduct=product_id)
+            elif space_mouse_pro_ids:
+                vendor_id, product_id = space_mouse_pro_ids.pop()
+                _device = usb.core.find(idVendor=vendor_id, idProduct=product_id)
+                self._is_pro = True
             else:
                 raise SystemError('SpaceNavigator not found');
 
