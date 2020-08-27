@@ -11,7 +11,8 @@ class SpaceMouse:
         usb_ids = [
         #   (idVendor, idProduct)
             (0x46d, 0xc626),
-            (0x256f, 0xc635)
+            (0x256f, 0xc635),
+            (0x46d, 0xc62b),
         ]
 
         _device = None
