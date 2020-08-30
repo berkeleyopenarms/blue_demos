@@ -16,7 +16,8 @@ if __name__ == '__main__':
     home = [0.0, -1.571, 0.0, -1.571, 0.0, -1.571, 0.0]
     blue.set_joint_positions( # TODO: this sometimes fights with the IK solver, and makes the robot really jittery
         home,
-        duration=1.0
+        duration=1.0,
+        # soft_position_control=True
     )
     position_control_mode = blue._control_mode # super sketchy
 

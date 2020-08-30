@@ -5,6 +5,7 @@ import sys
 import time
 import atexit
 import threading
+import os
 
 class SpaceMouse:
     def __init__(self):
@@ -31,7 +32,8 @@ class SpaceMouse:
                 raise SystemError('SpaceNavigator not found');
 
         self._reattach = False
-        if _device.is_kernel_driver_active(0):
+        # is_kernel_driver_active is not supported for windows
+        if os.name != "nt" and _device.is_kernel_driver_active(0):
             self._reattach = True
             _device.detach_kernel_driver(0)
 
@@ -97,6 +99,6 @@ class SpaceMouse:
         print("Cleaning up USB stuff...")
         self._alive = False
         usb.util.dispose_resources(self._device)
-        if self._reattach:
+        if os.name != "nt" and self._reattach:
             self._device.attach_kernel_driver(0)
 
