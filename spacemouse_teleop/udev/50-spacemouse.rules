@@ -1,3 +1,4 @@
 ACTION=="add", SUBSYSTEMS=="usb", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c626", MODE="660", GROUP="plugdev"
 ACTION=="add", SUBSYSTEMS=="usb", ATTRS{idVendor}=="256f", ATTRS{idProduct}=="c635", MODE="660", GROUP="plugdev"
 ACTION=="add", SUBSYSTEMS=="usb", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c62b", MODE="660", GROUP="plugdev"
+ACTION=="add", SUBSYSTEMS=="usb", ATTRS{idVendor}=="256f", ATTRS{idProduct}=="c632", MODE="660", GROUP="plugdev"

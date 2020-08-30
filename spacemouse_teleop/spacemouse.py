@@ -15,6 +15,7 @@ class SpaceMouse:
         ]
         space_mouse_pro_ids = [
             (0x46d, 0xc62b),
+            (0x256f, 0xc632),
         ]
 
         _device = None
