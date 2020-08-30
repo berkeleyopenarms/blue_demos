@@ -5,10 +5,12 @@ import numpy as np
 import time
 import transformations as t
 import spacemouse
+import sys
 
 if __name__ == '__main__':
     arm_side = "right"
-    address = "127.0.0.1"
+    assert len(sys.argv) == 2
+    address = sys.argv[1]
 
     # Python interface
     blue = BlueInterface(arm_side, address)
