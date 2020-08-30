@@ -34,6 +34,7 @@ class SpaceMouse:
         if _device.is_kernel_driver_active(0):
             self._reattach = True
             _device.detach_kernel_driver(0)
+            usb.util.claim_interface(_device, 0)
 
         self._ep_in = _device[0][(0,0)][0]
         self._ep_out = _device[0][(0,0)][1]
@@ -53,7 +54,7 @@ class SpaceMouse:
     def _worker(self):
         while self._alive:
             try:
-                data = self._device.read(self._ep_in.bEndpointAddress, self._ep_in.bLength, timeout=1000)
+                data = self._device.read(self._ep_in.bEndpointAddress, self._ep_in.wMaxPacketSize, timeout=1000)
 
                 if data[0] == 1:
                     # translation packet

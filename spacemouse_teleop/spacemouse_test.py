@@ -5,6 +5,7 @@ mouse = spacemouse.SpaceMouse()
 while True:
     print(mouse.input_button0, "\t", mouse.input_button1)
     print(mouse.input_pos, "\t", mouse.input_rot)
+    print(mouse._device)
 
     time.sleep(1)
 mouse.shutdown()
