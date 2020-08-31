@@ -8,7 +8,12 @@ import threading
 import os
 
 class SpaceMouse:
-    def __init__(self):
+    def __init__(self, threaded=True):
+        """
+        Arguments:
+            threaded (bool): whether to spawn worker thread to auto update the
+                spacemouse parameters.
+        """
         space_mouse_ids = [
         #   (idVendor, idProduct)
             (0x46d, 0xc626),
@@ -16,6 +21,9 @@ class SpaceMouse:
         ]
         space_mouse_pro_ids = [
             (0x46d, 0xc62b),
+        ]
+        space_mouse_wireless_pro_ids = [
+            (0x256f, 0xc632),
         ]
 
         _device = None
@@ -28,6 +36,11 @@ class SpaceMouse:
                 vendor_id, product_id = space_mouse_pro_ids.pop()
                 _device = usb.core.find(idVendor=vendor_id, idProduct=product_id)
                 self._is_pro = True
+            elif space_mouse_wireless_pro_ids:
+                vendor_id, product_id = space_mouse_wireless_pro_ids.pop()
+                _device = usb.core.find(idVendor=vendor_id, idProduct=product_id)
+                self._is_pro = True
+                self._is_wireless = True
             else:
                 raise SystemError('SpaceNavigator not found');
 
@@ -36,6 +49,7 @@ class SpaceMouse:
         if os.name != "nt" and _device.is_kernel_driver_active(0):
             self._reattach = True
             _device.detach_kernel_driver(0)
+            usb.util.claim_interface(_device, 0)
 
         self._ep_in = _device[0][(0,0)][0]
         self._ep_out = _device[0][(0,0)][1]
@@ -47,53 +61,63 @@ class SpaceMouse:
         self.input_rot = [0, 0, 0]
         self.input_button0 = False
         self.input_button1 = False
+        self.data = []
 
         self._alive = True
 
-        threading.Thread(target=self._worker).start()
+        if threaded:
+            threading.Thread(target=self._worker).start()
 
     def _worker(self):
         while self._alive:
-            try:
-                data = self._device.read(self._ep_in.bEndpointAddress, self._ep_in.bLength, timeout=1000)
+            self.update()
 
-                if data[0] == 1:
-                    # translation packet
-                    tx = data[1] + (data[2]*256)
-                    ty = data[3] + (data[4]*256)
-                    tz = data[5] + (data[6]*256)
+    def update(self):
+        try:
+            data = self._device.read(
+                self._ep_in.bEndpointAddress, self._ep_in.wMaxPacketSize, timeout=1000)
 
-                    if data[2] > 127:
-                        tx -= 65536
-                    if data[4] > 127:
-                        ty -= 65536
-                    if data[6] > 127:
-                        tz -= 65536
+            if data[0] == 1:
+                # translation packet
+                tx = data[1] + (data[2]*256)
+                ty = data[3] + (data[4]*256)
+                tz = data[5] + (data[6]*256)
 
-                    self.input_pos = [tx, ty, tz]
+                if data[2] > 127:
+                    tx -= 65536
+                if data[4] > 127:
+                    ty -= 65536
+                if data[6] > 127:
+                    tz -= 65536
 
-                if data[0] == 2:
-                    # rotation packet
-                    rx = data[1] + (data[2]*256)
-                    ry = data[3] + (data[4]*256)
-                    rz = data[5] + (data[6]*256)
+                self.input_pos = [tx, ty, tz]
 
-                    if data[2] > 127:
-                        rx -= 65536
-                    if data[4] > 127:
-                        ry -= 65536
-                    if data[6] > 127:
-                        rz -= 65536
+            if data[0] == 2 or (data[0] == 1 and self._is_wireless):
+                offset = 0
+                if self._is_wireless:
+                    offset = 6
 
-                    self.input_rot = [rx, ry, rz]
+                # rotation packet
+                rx = data[offset + 1] + (data[offset + 2]*256)
+                ry = data[offset + 3] + (data[offset + 4]*256)
+                rz = data[offset + 5] + (data[offset + 6]*256)
 
-                if data[0] == 3:
-                    # button packet
-                    self.input_button0 = ((data[1] & 0b1) == 0b1)
-                    self.input_button1 = ((data[1] >> 1 & 0b1) == 0b1)
+                if data[offset + 2] > 127:
+                    rx -= 65536
+                if data[offset + 4] > 127:
+                    ry -= 65536
+                if data[offset + 6] > 127:
+                    rz -= 65536
 
-            except usb.core.USBError:
-                pass # timeout, probably
+                self.input_rot = [rx, ry, rz]
+
+            if data[0] == 3:
+                # button packet
+                self.input_button0 = ((data[1] & 0b1) == 0b1)
+                self.input_button1 = ((data[1] >> 1 & 0b1) == 0b1)
+
+        except usb.core.USBError:
+            pass # timeout, probably
 
     def shutdown(self):
         print("Cleaning up USB stuff...")
